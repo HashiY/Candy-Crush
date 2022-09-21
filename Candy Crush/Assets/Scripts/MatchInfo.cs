@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//classe q vai guardar informaçoes
+//classe q vai guardar informacoes
 public class MatchInfo
 {
     public List<GridItem> match; // para conseguir acessar
@@ -15,6 +15,6 @@ public class MatchInfo
 
     public bool IsMatchValid
     {
-        get { return match != null; }//verifiva se e nulo ou nao 
+        get { return match != null; }//verifica se e nulo ou nao 
     }
 }

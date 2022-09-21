@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
@@ -16,14 +18,39 @@ public class GameManager : MonoBehaviour {
     private GridItem[,] _items; // referencia para a posiçao dos itens
     private GridItem _selectedItem;
 
-	void Start ()
+    public Text scoreText;
+    public Text highScoreText;
+    public GameObject objectCanvasScore;
+    public GameObject objectCanvasHighscore;
+    private int score, highscore;
+    private string sceneName;
+    public GameObject objectRestartButton;
+
+    public AudioClip scoreSE, restartSE;
+    AudioSource audioSource;
+
+    void Start ()
     {
+        audioSource = GetComponent<AudioSource>();
         _canPlay = true;
         GetFruits();
         CreateGrid();
         ClearGrid();
         GridItem.OnMouseOverItemEventHandler += OnMouseOverItem; //atribuindo um valor alem que existe na classe
-	}
+
+        scoreText.text = "0";
+        objectCanvasScore.transform.position = new Vector2(Screen.width / 6 - 46, Screen.height - 100);
+        objectCanvasHighscore.transform.position = new Vector2(Screen.width / 6 - 46, Screen.height - 50);
+        objectRestartButton.transform.position = new Vector2(Screen.width / 6 - 46, Screen.height/5);
+
+        //Colocando o highscore para ser salvo
+        sceneName = SceneManager.GetActiveScene().name;
+        if (PlayerPrefs.HasKey(sceneName + "score"))
+        {
+            highscore = PlayerPrefs.GetInt(sceneName + "score");
+            highScoreText.text = highscore.ToString();
+        }
+    }
 
     private void OnDisable()
     {
@@ -190,6 +217,7 @@ public class GameManager : MonoBehaviour {
     {
         foreach (GridItem i in items) //i em itens 
         {
+            Score();
             yield return StartCoroutine(i.transform.Scale(Vector3.zero, 0.05f));//a escala vai zerar
   /*eu*/   // yield return new WaitForSeconds(delayBetweenMatches);//delay
             Destroy(i.gameObject);
@@ -347,5 +375,31 @@ public class GameManager : MonoBehaviour {
         {
             i.GetComponent<Rigidbody2D>().isKinematic = !state; // desliga a fisica
         }
+    }
+
+    void Score()
+    {
+        audioSource.PlayOneShot(scoreSE, 0.3f);
+        score++;
+        scoreText.text = score.ToString();
+
+        if (score > highscore)
+        {
+            highscore = score;
+            highScoreText.text = highscore.ToString();
+            PlayerPrefs.SetInt(sceneName + "score", highscore);
+        }
+    }
+
+    public void RestartButtonPress()
+    {
+        audioSource.PlayOneShot(restartSE, 0.3f);
+        StartCoroutine(reloadScene());
+    }
+
+    IEnumerator reloadScene()
+    {
+        yield return new WaitForSeconds(0.5f);
+        SceneManager.LoadScene("Fome");
     }
 }
